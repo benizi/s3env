@@ -1,0 +1,8 @@
+[package]
+name = "s3env"
+version = "0.1.0"
+authors = ["Benjamin R. Haskell <rust@benizi.com>"]
+
+[dependencies]
+getopts = "0.2"
+rust-ini = "*"
