@@ -48,6 +48,8 @@ fn main() {
     options.optopt("a", "access", "Name of ENV var for Access Key", "NAME");
     options.optopt("s", "secret", "Name of ENV var for Secret Key", "NAME");
 
+    options.optflag("", "dockerenv", "Print as docker run -e args");
+
     let matches = match options.parse(&args[1..]) {
         Ok(m) => m,
         Err(e) => panic!(e.to_string()),
@@ -57,10 +59,25 @@ fn main() {
         Some(s) => s,
         None => "default".to_owned()
     };
-    println!("s3cmd: {}", matches.opt_present("s3cmd"));
     let cfg = match get_s3cfg("/home/bhaskell/.s3cfg", &section[..]) {
         Ok(cfg) => cfg,
         Err(e) => { println!("Failed: {}", e.msg); std::process::exit(1) }
     };
-    println!("{:?}", cfg);
+
+    let accessname = match matches.opts_str(&["a".to_string(), "access".to_string()]) {
+        Some(k) => k,
+        None => String::from("AWS_KEY")
+    };
+
+    let secretname = match matches.opts_str(&["s".to_string(), "secret".to_string()]) {
+        Some(k) => k,
+        None => String::from("AWS_SECRET")
+    };
+
+    if matches.opt_present("dockerenv") {
+        println!("-e {}={}", accessname, cfg.access);
+        println!("-e {}={}", secretname, cfg.secret);
+    } else {
+        println!("{:?}", cfg);
+    }
 }
