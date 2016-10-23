@@ -20,10 +20,9 @@ fn ini_err(msg: &str) -> IniErr {
 }
 
 fn get_opt(section: &Properties, key: &str) -> Result<String, IniErr> {
-    match section.get(key) {
-        Some(s) => Ok(s.clone()),
-        None => Err(ini_err(&*format!("no {} key", key))),
-    }
+    section.get(key)
+        .map(|s| s.clone())
+        .ok_or(ini_err(&*format!("no {} key", key)))
 }
 
 fn get_s3cfg(filename: &str, section: &str) -> Result<S3cfg, IniErr> {
@@ -50,29 +49,23 @@ fn main() {
 
     options.optflag("", "dockerenv", "Print as docker run -e args");
 
-    let matches = match options.parse(&args[1..]) {
-        Ok(m) => m,
-        Err(e) => panic!(e.to_string()),
-    };
+    let matches = options.parse(&args[1..])
+        .unwrap_or_else(|e| panic!(e.to_string()));
 
-    let section = match matches.opts_str(&["i".to_string(), "identity".into(), "section".into()]) {
-        Some(s) => s,
-        None => "default".to_owned()
-    };
-    let cfg = match get_s3cfg("/home/bhaskell/.s3cfg", &section[..]) {
-        Ok(cfg) => cfg,
-        Err(e) => { println!("Failed: {}", e.msg); std::process::exit(1) }
-    };
+    let section = matches.opts_str(&["i".to_string(), "identity".into(), "section".into()])
+        .unwrap_or(String::from("default"));
 
-    let accessname = match matches.opts_str(&["a".to_string(), "access".into()]) {
-        Some(k) => k,
-        None => String::from("AWS_KEY")
-    };
+    let cfg = get_s3cfg("/home/bhaskell/.s3cfg", &section[..])
+        .unwrap_or_else(|e| {
+            println!("Failed: {}", e.msg);
+            std::process::exit(1)
+        });
 
-    let secretname = match matches.opts_str(&["s".to_string(), "secret".into()]) {
-        Some(k) => k,
-        None => String::from("AWS_SECRET")
-    };
+    let accessname = matches.opts_str(&["a".to_string(), "access".into()])
+        .unwrap_or(String::from("AWS_KEY"));
+
+    let secretname = matches.opts_str(&["s".to_string(), "secret".into()])
+        .unwrap_or(String::from("AWS_SECRET"));
 
     if matches.opt_present("dockerenv") {
         println!("-e {}={}", accessname, cfg.access);
