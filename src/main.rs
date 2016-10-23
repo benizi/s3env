@@ -16,7 +16,11 @@ struct S3cfg {
 }
 
 fn ini_err(msg: &str) -> IniErr {
-    IniErr{line: 0, col: 0, msg: msg.to_string()}
+    IniErr {
+        line: 0,
+        col: 0,
+        msg: msg.to_string(),
+    }
 }
 
 fn get_opt(section: &Properties, key: &str) -> Result<String, IniErr> {
@@ -33,7 +37,10 @@ fn get_s3cfg(filename: &str, section: &str) -> Result<S3cfg, IniErr> {
     };
     let access = try!(get_opt(section, "access_key"));
     let secret = try!(get_opt(section, "secret_key"));
-    Ok(S3cfg{access: access.to_owned(), secret: secret.to_owned()})
+    Ok(S3cfg {
+        access: access.to_owned(),
+        secret: secret.to_owned(),
+    })
 }
 
 fn main() {
@@ -55,11 +62,10 @@ fn main() {
     let section = matches.opts_str(&["i".to_string(), "identity".into(), "section".into()])
         .unwrap_or(String::from("default"));
 
-    let cfg = get_s3cfg("/home/bhaskell/.s3cfg", &section[..])
-        .unwrap_or_else(|e| {
-            println!("Failed: {}", e.msg);
-            std::process::exit(1)
-        });
+    let cfg = get_s3cfg("/home/bhaskell/.s3cfg", &section[..]).unwrap_or_else(|e| {
+        println!("Failed: {}", e.msg);
+        std::process::exit(1)
+    });
 
     let accessname = matches.opts_str(&["a".to_string(), "access".into()])
         .unwrap_or(String::from("AWS_KEY"));
