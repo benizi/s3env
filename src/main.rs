@@ -55,7 +55,7 @@ fn main() {
         Err(e) => panic!(e.to_string()),
     };
 
-    let section = match matches.opts_str(&["i".to_string(),"identity".to_string(),"section".to_string()]) {
+    let section = match matches.opts_str(&["i".to_string(), "identity".into(), "section".into()]) {
         Some(s) => s,
         None => "default".to_owned()
     };
@@ -64,12 +64,12 @@ fn main() {
         Err(e) => { println!("Failed: {}", e.msg); std::process::exit(1) }
     };
 
-    let accessname = match matches.opts_str(&["a".to_string(), "access".to_string()]) {
+    let accessname = match matches.opts_str(&["a".to_string(), "access".into()]) {
         Some(k) => k,
         None => String::from("AWS_KEY")
     };
 
-    let secretname = match matches.opts_str(&["s".to_string(), "secret".to_string()]) {
+    let secretname = match matches.opts_str(&["s".to_string(), "secret".into()]) {
         Some(k) => k,
         None => String::from("AWS_SECRET")
     };
