@@ -3,6 +3,8 @@ extern crate ini;
 
 use getopts::Options;
 use std::env;
+use std::os::unix::process::CommandExt;
+use std::process::Command;
 use ini::Ini;
 use ini::ini::Properties;
 
@@ -77,6 +79,16 @@ fn main() {
         println!("-e {}={}", accessname, cfg.access);
         println!("-e {}={}", secretname, cfg.secret);
     } else {
-        println!("{:?}", cfg);
+        let args = matches.free;
+        if args.is_empty() {
+            println!("Must specify command to run");
+            std::process::exit(1);
+        }
+        let ref cmd = args[0];
+        panic!(Command::new(cmd)
+            .args(&args[1..])
+            .env(accessname, cfg.access)
+            .env(secretname, cfg.secret)
+            .exec());
     }
 }
